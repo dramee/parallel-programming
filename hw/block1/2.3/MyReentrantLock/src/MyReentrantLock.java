@@ -35,24 +35,26 @@ class MyReentrantLock {
     public void lock() {
 
         Thread current = Thread.currentThread();
-        while (myTryLock()) {
-            try {
-                if (owner == null) {
-                    owner = current;
-                    usages = 1;
-                    return;
-                } else if (owner == Thread.currentThread()) {
-                    usages++;
-                    return;
+        while (true) {
+            if (myTryLock()) {
+                try {
+                    if (owner == null) {
+                        owner = current;
+                        usages = 1;
+                        return;
+                    } else if (owner == Thread.currentThread()) {
+                        usages++;
+                        return;
+                    }
+                } finally {
+                    lock.unlock();
                 }
-            } finally {
-                lock.unlock();
-            }
-            for (int i = 0; i < backOff; i++) {
-                Thread.yield();
-            }
-            if (backOff < MAX_BACKOFF) {
-                backOff *= 2;
+                for (int i = 0; i < backOff; i++) {
+                    Thread.yield();
+                }
+                if (backOff < MAX_BACKOFF) {
+                    backOff *= 2;
+                }
             }
         }
     }
