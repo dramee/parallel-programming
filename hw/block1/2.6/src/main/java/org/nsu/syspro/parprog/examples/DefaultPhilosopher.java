@@ -3,6 +3,7 @@ package org.nsu.syspro.parprog.examples;
 import org.nsu.syspro.parprog.interfaces.Fork;
 import org.nsu.syspro.parprog.interfaces.Philosopher;
 
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultPhilosopher implements Philosopher {
@@ -10,6 +11,7 @@ public class DefaultPhilosopher implements Philosopher {
     private static final AtomicLong idProvider = new AtomicLong(0);
     public final long id;
     private long successfulMeals;
+    static private final ArrayList<Long> forks = new ArrayList<>();
 
     public DefaultPhilosopher() {
         this.id = idProvider.getAndAdd(1);
@@ -27,8 +29,11 @@ public class DefaultPhilosopher implements Philosopher {
     }
 
     public void onHungry(Fork left, Fork right) {
-        // TODO: implement me properly
-        eat(left, right);
+        if (right.id() < left.id()) {
+            eat(right, left);
+        } else {
+            eat(left, right);
+        }
     }
 
     @Override
