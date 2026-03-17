@@ -2,7 +2,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
 class MyReentrantLockTest {
@@ -32,6 +31,7 @@ class MyReentrantLockTest {
             lock.unlock();
         }
     }
+
 
     static class SimpleFactory implements NonReentrantLockFactory {
         public NonReentrantLock create() {
@@ -112,14 +112,33 @@ class MyReentrantLockTest {
     }
 
     @Test
-    void testReentrantBehavior() {
-
+    void testBackOffPolicy() throws InterruptedException {
+        AtomicInteger x = new AtomicInteger();
         MyReentrantLock lock = new MyReentrantLock(new SimpleFactory());
-
-        lock.lock();
-        lock.lock();
-
-        lock.unlock();
-        lock.unlock();
+        Thread A = new Thread(() -> {
+            lock.lock();
+            try {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            } finally {
+                lock.unlock();
+            }
+        });
+        Thread B = new Thread(() -> {
+           lock.lock();
+           try {
+               x.getAndIncrement();
+           } finally {
+               lock.unlock();
+           }
+        });
+        A.start();
+        B.start();
+        A.join();
+        B.join();
+        assertEquals(1, x.get());
     }
 }

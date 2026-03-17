@@ -33,7 +33,6 @@ class MyReentrantLock {
      *     If current thread isn't holding this lock, but another thread do, then spinning with exponential backOff policy
      */
     public void lock() {
-
         Thread current = Thread.currentThread();
         while (true) {
             if (myTryLock()) {
@@ -49,12 +48,15 @@ class MyReentrantLock {
                 } finally {
                     lock.unlock();
                 }
-                for (int i = 0; i < backOff; i++) {
-                    Thread.yield();
+                try {
+                    Thread.sleep(backOff);
+                    if (backOff < MAX_BACKOFF) {
+                        backOff*=2;
+                    }
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
-                if (backOff < MAX_BACKOFF) {
-                    backOff *= 2;
-                }
+                Thread.onSpinWait();
             }
         }
     }
