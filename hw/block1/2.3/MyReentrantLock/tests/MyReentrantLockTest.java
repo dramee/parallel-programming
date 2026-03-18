@@ -32,6 +32,22 @@ class MyReentrantLockTest {
         }
     }
 
+    static class LockShowBackoff extends MyReentrantLock {
+
+        /**
+         * Creates an instance of MyReentrantLock
+         *
+         * @param factory
+         */
+        public LockShowBackoff(NonReentrantLockFactory factory) {
+            super(factory);
+        }
+
+        public int getBackOff() {
+            return backOff;
+        }
+    }
+
 
     static class SimpleFactory implements NonReentrantLockFactory {
         public NonReentrantLock create() {
@@ -114,7 +130,7 @@ class MyReentrantLockTest {
     @Test
     void testBackOffPolicy() throws InterruptedException {
         AtomicInteger x = new AtomicInteger();
-        MyReentrantLock lock = new MyReentrantLock(new SimpleFactory());
+        LockShowBackoff lock = new LockShowBackoff(new SimpleFactory());
         Thread A = new Thread(() -> {
             lock.lock();
             try {
@@ -139,6 +155,6 @@ class MyReentrantLockTest {
         B.start();
         A.join();
         B.join();
-        assertEquals(1, x.get());
+        assertTrue(lock.getBackOff() > 1);
     }
 }
