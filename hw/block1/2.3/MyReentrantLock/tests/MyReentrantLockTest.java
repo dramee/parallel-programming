@@ -86,7 +86,10 @@ class MyReentrantLockTest {
             public void increment() {
                 lock.lock();
                 try {
+                    Thread.sleep(100);
                     counter++;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 } finally {
                     lock.unlock();
                 }
@@ -95,7 +98,10 @@ class MyReentrantLockTest {
             public long get() {
                 lock.lock();
                 try {
+                    Thread.sleep(100);
                     return counter;
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 } finally {
                     lock.unlock();
                 }
