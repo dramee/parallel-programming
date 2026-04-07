@@ -28,7 +28,7 @@ class JoinFutureTest {
     }
 
     @Test
-    void testIsDoneBeforeGet() throws Exception {
+    void testIsDoneAfterGet() throws Exception {
         var executor = new ThreadPerTaskExecutorService(factory);
 
         var f = executor.submit(() -> 1);
