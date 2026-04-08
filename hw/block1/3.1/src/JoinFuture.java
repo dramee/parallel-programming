@@ -15,6 +15,7 @@ class JoinFuture<V> {
         try {
             thread.join();
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new ExecutionException(e);
         }
 
