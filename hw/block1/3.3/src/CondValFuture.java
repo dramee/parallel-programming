@@ -28,6 +28,7 @@ class CondVarFuture<V> {
 
             return result;
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new ExecutionException(e);
         } finally {
             lock.unlock();
